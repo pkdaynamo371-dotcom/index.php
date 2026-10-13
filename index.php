@@ -66,7 +66,7 @@ $user_ip = getClientIP();
 </head>
 <body>
 
-<div class="card">
+<div class="card">cd path/to/your/project-folder
     <h2>🌐 عنوان IP الخاص بك</h2>
     <p>عنوان الـ IP الذي تتصل به حالياً هو:</p>
     
