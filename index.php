@@ -61,11 +61,11 @@ $user_ip = getClientIP();
         p {
             color: #94a3b8;
             font-size: 14px;
-        }
+        }mv dockerfile Dockerfile
     </style>
 </head>
-<body>
-
+<body>cd path/to/your/project-folder
+docker build -f path/to/Dockerfile .
 <div class="card">cd path/to/your/project-folder
     <h2>🌐 عنوان IP الخاص بك</h2>
     <p>عنوان الـ IP الذي تتصل به حالياً هو:</p>
