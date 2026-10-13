@@ -1,81 +1,68 @@
-<?php
-// دالة لجلب عنوان الـ IP الحقيقي مع مراعاة بروكسي Render
-function getClientIP() {
-    $ipaddress = '';
-    
-    if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-        // قد تحتوي هذه الترويسة على عدة عناوين مفصولة بفواصل، الأول هو IP الحقيقي للمستخدم
-        $ipList = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);cd /path/to/your/project-folder
-        $ipaddress = trim($ipList[0]);
-    } else if (isset($_SERVER['REMOTE_ADDR'])) {
-        $ipaddress = $_SERVER['REMOTE_ADDR'];
-    } else {
-        $ipaddress = 'UNKNOWN';
-    }
-    return $ipaddress;
+FROM php:8.2-apache
+COPY . /var/www/html/<?php
+session_start();
+
+// تهيئة نقاط اللعبة إذا لم تكن موجودة
+if (!isset($_SESSION['player_hp'])) {
+    $_SESSION['player_hp'] = 100;
+    $_SESSION['enemy_hp'] = 100;
+    $_SESSION['message'] = "بدأت المعركة! اختر هجومك.";
 }
 
-$user_ip = getClientIP();
+// معالجة الأزرار عند الضغط عليها
+if (isset($_POST['action'])) {
+    if ($_POST['action'] == 'attack') {
+        $player_damage = rand(10, 20);
+        $enemy_damage = rand(5, 15);
+
+        $_SESSION['enemy_hp'] -= $player_damage;
+        $_SESSION['player_hp'] -= $enemy_damage;
+
+        $_SESSION['message'] = "أطلقت نيران! سببت ضرر للعدو بقيمة $1 وإلحاق الضرر بك بقيمة $2.";
+    } elseif ($_POST['action'] == 'reset') {
+        $_SESSION['player_hp'] = 100;
+        $_SESSION['enemy_hp'] = 100;
+        $_SESSION['message'] = "تم إعادةเริ่ม المعركة من جديد!";
+    }
+}
+
+// التحقق من نهاية اللعبة
+$game_over = false;
+if ($_SESSION['player_hp'] <= 0) {
+    $_SESSION['message'] = "لقد خسرت المعركة! دمر العدو قاعدتك.";
+    $game_over = true;
+} elseif ($_SESSION['enemy_hp'] <= 0) {
+    $_SESSION['message'] = "تهانينا! لقد انتصرت ودمرت قاعدة العدو!";
+    $game_over = true;
+}
 ?>
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>معرفة عنوان IP الخاص بك</title>
+    <title>لعبة الحرب بـ PHP</title>
     <style>
-        body {
-            font-family: Tahoma, sans-serif;
-            background: #0f172a;
-            color: #f8fafc;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .card {
-            background: #1e293b;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            text-align: center;
-            max-width: 400px;
-            width: 100%;
-        }
-        h2 {
-            margin-bottom: 20px;
-            color: #38bdf8;
-        }
-        .ip-box {
-            background: #0f172a;
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 24px;
-            font-weight: bold;
-            color: #4ade80;
-            letter-spacing: 1px;
-            margin: 20px 0;
-            border: 1px dashed #334155;
-        }
-        p {
-            color: #94a3b8;
-            font-size: 14px;
-        }mv dockerfile Dockerfile
+        body { background: #111; color: #fff; font-family: Tahoma; text-align: center; padding-top: 50px; }
+        .box { background: #222; border: 2px solid #444; display: inline-block; padding: 20px; border-radius: 10px; width: 400px; }
+        button { padding: 10px 20px; font-size: 16px; background: #d9534f; color: #fff; border: none; cursor: pointer; border-radius: 5px; }
+        button:hover { background: #c9302c; }
     </style>
 </head>
-<body>cd path/to/your/project-folder
-docker build -f path/to/Dockerfile .
-<div class="card">cd path/to/your/project-folder
-    <h2>🌐 عنوان IP الخاص بك</h2>
-    <p>عنوان الـ IP الذي تتصل به حالياً هو:</p>
-    
-    <div class="ip-box">
-        <?php echo htmlspecialchars($user_ip, ENT_QUOTES, 'UTF-8'); ?>
-    </div>
-    
-    <p>مُستضاف على منصة Render</p>
-</div>
+<body>
+    <div class="box">
+        <h2>لعبة الحرب التكتيكية</h2>
+        <p><?php echo $_SESSION['message']; ?></p>
+        <hr>
+        <p><strong>صحتك:</strong> <?php echo max(0, $_SESSION['player_hp']); ?> / 100</p>
+        <p><strong>صحة العدو:</strong> <?php echo max(0, $_SESSION['enemy_hp']); ?> / 100</p>
 
+        <form method="POST">
+            <?php if (!$game_over): ?>
+                <button type="submit" name="action" value="attack">هجوم مدفعي</button>
+            <?php else: ?>
+                <button type="submit" name="action" value="reset">إعادة اللعب</button>
+            <?php endif; ?>
+        </form>
+    </div>
 </body>
 </html>
