@@ -5,7 +5,7 @@ function getClientIP() {
     
     if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
         // قد تحتوي هذه الترويسة على عدة عناوين مفصولة بفواصل، الأول هو IP الحقيقي للمستخدم
-        $ipList = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+        $ipList = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);cd /path/to/your/project-folder
         $ipaddress = trim($ipList[0]);
     } else if (isset($_SERVER['REMOTE_ADDR'])) {
         $ipaddress = $_SERVER['REMOTE_ADDR'];
